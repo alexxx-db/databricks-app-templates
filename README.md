@@ -142,6 +142,7 @@ End-to-end example apps that bundle a full Databricks App with seed data, SQL qu
 | Template | Description | Dependencies |
 |----------|-------------|--------------|
 | `agentic-support-console` | End-to-end AI-powered support console combining Lakebase, Lakehouse Sync, a medallion pipeline, an LLM agent job, reverse sync, and a Databricks App with Genie analytics. | SQL warehouse, Database, Genie Space, MLflow experiment |
+| `city-311-operations` | City 311 operations: service-level dashboards, a mix-adjusted service-equity analysis across districts, and AI-assisted intake with PII redaction and multilingual resident updates. Synthetic data. | SQL warehouse, Serving endpoint |
 | `content-moderator` | Internal content moderation tool with per-channel guidelines, AI-powered compliance scoring via Model Serving, and a moderator review workflow backed by Lakebase and Genie analytics. | SQL warehouse, Database, Genie Space, Serving endpoint |
 | `inventory-intelligence` | Retail inventory management with AI-powered demand forecasting, replenishment recommendations, and optional Genie analytics. Built on a live medallion pipeline synced to Lakebase. | SQL warehouse, Database, Genie Space |
 | `rag-chat` | Streaming Retrieval-Augmented Generation chat app with pgvector retrieval from Lakebase, Wikipedia seed corpus, Model Serving generation, and Lakebase-backed chat history. Consumed via `databricks apps init`. | Database, Serving endpoint |

@@ -79,6 +79,7 @@ CLASSIC_TEMPLATES = [
 # Smoke-tested alongside CLASSIC_TEMPLATES; their own tests live in <template>/tests/.
 PYTHON_SHOWCASES = [
     "aml-alert-triage",
+    "city-311-operations",
     "hls-clinical-explorer",
     "retail-customer-assistant",
 ]

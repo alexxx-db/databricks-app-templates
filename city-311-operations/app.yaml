@@ -1,0 +1,9 @@
+command: ["streamlit", "run", "app.py"]
+env:
+  - name: DATABRICKS_WAREHOUSE_ID
+    valueFrom: sql-warehouse
+  - name: SERVING_ENDPOINT
+    valueFrom: serving-endpoint
+  # Must match the catalog/schema the setup job writes to (databricks.yml: var.catalog / var.schema).
+  - name: CITY_SCHEMA
+    value: "main.city_311"

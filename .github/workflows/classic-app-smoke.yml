@@ -11,6 +11,7 @@ on:
       - "retail-customer-assistant/**"
       - "hls-clinical-explorer/**"
       - "aml-alert-triage/**"
+      - "city-311-operations/**"
       - ".scripts/templates.py"
       - ".scripts/generate-classic-docs.py"
       - ".scripts/classic-app-tests/**"
@@ -41,7 +42,7 @@ jobs:
     timeout-minutes: 30
     strategy:
       matrix:
-        template: [retail-customer-assistant, hls-clinical-explorer, aml-alert-triage]
+        template: [retail-customer-assistant, hls-clinical-explorer, aml-alert-triage, city-311-operations]
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6

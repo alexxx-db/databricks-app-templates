@@ -55,6 +55,7 @@ DUMMY_ENV = {
     "RETAIL_SCHEMA": "dummy.dummy",
     "HLS_SCHEMA": "dummy.dummy",
     "AML_SCHEMA": "dummy.dummy",
+    "CITY_SCHEMA": "dummy.dummy",
     "STREAMLIT_SERVER_HEADLESS": "true",
     "STREAMLIT_BROWSER_GATHER_USAGE_STATS": "false",
 }
