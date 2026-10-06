@@ -4,6 +4,32 @@ Pre-built templates for creating [Databricks Apps](https://docs.databricks.com/a
 
 See [Create an App from a Template](https://docs.databricks.com/aws/en/dev-tools/databricks-apps/create-app-template) to get started.
 
+## Which template should I pick?
+
+**1. What are you building?**
+
+| Goal | Start from |
+|------|-----------|
+| Learn the platform / minimal starting point | a `*-hello-world-app` |
+| Dashboard over Unity Catalog tables | `appkit-analytics` (TypeScript) or a `*-data-app` (Python) |
+| CRUD app with its own database | `appkit-lakebase` (TypeScript) or a `*-postgres-app` (Python, Lakebase Autoscaling) |
+| Chat UI over a model or agent endpoint | `e2e-chatbot-app-next` (full-featured) or a `*-chatbot-app` (minimal Python) |
+| Agent with tools, memory, evaluation | `agent-langgraph` or `agent-openai-agents-sdk` (add `-advanced` for memory) |
+| Natural-language questions over data | `appkit-genie` |
+| Expose tools to AI clients | `mcp-server-hello-world` |
+| See a complete reference solution | a [showcase example](#showcase-examples) |
+
+**2. Python or TypeScript?** AppKit (`appkit-*`) is the recommended TypeScript/React stack: typed SQL, built-in charts, plugins for Genie/Lakebase/Serving. The Python templates come in Streamlit, Dash, Gradio, Shiny and Flask flavors; pick the framework your team already knows; they cover the same use cases.
+
+**3. Whose permissions should queries use?**
+
+- **App service principal** (default): every user sees the same data; you grant the app's service principal access once.
+- **On behalf of the user** (`*-obo-user` templates, `user_api_scopes`): queries run with each signed-in user's Unity Catalog permissions. Use this when users must only see data they are entitled to.
+
+**4. Lakebase Provisioned or Autoscaling?** New apps should use Autoscaling (`*-postgres-app`, `appkit-lakebase`). The `*-database-app` templates target Lakebase Provisioned instances.
+
+Every Python template's README covers its resources, permissions, local run and deploy steps, and each ships a `databricks.yml` for CLI/CI deploys (`databricks bundle deploy -t dev`).
+
 ## Templates
 
 ### Hello World
@@ -40,14 +66,31 @@ See [Create an App from a Template](https://docs.databricks.com/aws/en/dev-tools
 | `dash-data-app` | An app that reads from a SQL warehouse and visualizes data | SQL warehouse |
 | `gradio-data-app` | An app that reads from a SQL warehouse and visualizes data | SQL warehouse |
 | `shiny-data-app` | An app that reads from a SQL warehouse and visualizes data | SQL warehouse |
+| `streamlit-data-app-obo-user` | Same as `streamlit-data-app`, but queries run with the signed-in user's permissions | SQL warehouse, user API scope `sql` |
+| `dash-data-app-obo-user` | Same as `dash-data-app`, but queries run with the signed-in user's permissions | SQL warehouse, user API scope `sql` |
+| `gradio-data-app-obo-user` | Same as `gradio-data-app`, but queries run with the signed-in user's permissions | SQL warehouse, user API scope `sql` |
+| `shiny-data-app-obo-user` | Same as `shiny-data-app`, but queries run with the signed-in user's permissions | SQL warehouse, user API scope `sql` |
 
 ### Database
 
 | Template | Description | Dependencies |
 |----------|-------------|--------------|
-| `streamlit-database-app` | A todo app that stores tasks in a Postgres database hosted on Databricks | Database |
-| `dash-database-app` | A todo app that stores tasks in a Postgres database hosted on Databricks | Database |
-| `flask-database-app` | A todo app that stores tasks in a Postgres database hosted on Databricks | Database |
+| `streamlit-database-app` | A todo app that stores tasks in a Postgres database hosted on Databricks (Lakebase Provisioned) | Database |
+| `dash-database-app` | A todo app that stores tasks in a Postgres database hosted on Databricks (Lakebase Provisioned) | Database |
+| `flask-database-app` | A todo app that stores tasks in a Postgres database hosted on Databricks (Lakebase Provisioned) | Database |
+| `streamlit-postgres-app` | A todo app that stores tasks in a Lakebase Autoscaling Postgres database | Database |
+| `dash-postgres-app` | A todo app that stores tasks in a Lakebase Autoscaling Postgres database | Database |
+| `flask-postgres-app` | A todo app that stores tasks in a Lakebase Autoscaling Postgres database | Database |
+
+### Chatbot
+
+| Template | Description | Dependencies |
+|----------|-------------|--------------|
+| `streamlit-chatbot-app` | A minimal chat UI for an LLM on Databricks Model Serving | Serving endpoint |
+| `dash-chatbot-app` | A minimal chat UI for an LLM on Databricks Model Serving | Serving endpoint |
+| `gradio-chatbot-app` | A minimal chat UI for an LLM on Databricks Model Serving | Serving endpoint |
+| `shiny-chatbot-app` | A minimal chat UI for an LLM on Databricks Model Serving | Serving endpoint |
+| `e2e-chatbot-app` | Earlier Streamlit chat UI for agent and foundation-model endpoints; prefer `e2e-chatbot-app-next` for new work | Serving endpoint |
 
 ### AppKit
 

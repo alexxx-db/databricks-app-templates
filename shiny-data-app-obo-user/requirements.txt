@@ -4,3 +4,4 @@ shiny~=1.1.0
 matplotlib~=3.10.8
 numpy~=1.26.4
 websockets~=12.0
+htmltools<0.7  # htmltools 0.7 breaks shiny 1.1 express UI (TypeError in tagify)

@@ -39,3 +39,33 @@ TEMPLATES = {
         "bundle_name": "agent_migration",
     },
 }
+
+# Classic single-file Python templates (requirements.txt + app.yaml, no pyproject).
+# Used by generate-classic-docs.py and classic-app-tests/.
+CLASSIC_TEMPLATES = [
+    "dash-chatbot-app",
+    "dash-data-app",
+    "dash-data-app-obo-user",
+    "dash-database-app",
+    "dash-hello-world-app",
+    "dash-postgres-app",
+    "e2e-chatbot-app",
+    "flask-database-app",
+    "flask-hello-world-app",
+    "flask-postgres-app",
+    "gradio-chatbot-app",
+    "gradio-data-app",
+    "gradio-data-app-obo-user",
+    "gradio-hello-world-app",
+    "nodejs-fastapi-hello-world-app",
+    "shiny-chatbot-app",
+    "shiny-data-app",
+    "shiny-data-app-obo-user",
+    "shiny-hello-world-app",
+    "streamlit-chatbot-app",
+    "streamlit-data-app",
+    "streamlit-data-app-obo-user",
+    "streamlit-database-app",
+    "streamlit-hello-world-app",
+    "streamlit-postgres-app",
+]

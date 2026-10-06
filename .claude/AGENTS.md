@@ -1,6 +1,6 @@
 # Agent Templates — Rules for Modification
 
-These rules apply ONLY when modifying agent templates in this repository. An "agent template" is any top-level directory with the `agent-` prefix, excluding TypeScript/JavaScript templates (e.g., `agent-langchain-ts`).
+Most rules below apply ONLY when modifying agent templates in this repository (classic Python templates have their own section). An "agent template" is any top-level directory with the `agent-` prefix, excluding TypeScript/JavaScript templates (e.g., `agent-langchain-ts`).
 
 ## CRITICAL: Sync After Modifying Shared Sources
 
@@ -105,12 +105,28 @@ uv run pytest test_e2e.py -v -n0 -s --template agent-langgraph
 
 Template test configs are in `.scripts/agent-integration-tests/template_config.py`.
 
+## Classic Python Templates
+
+The single-file Python templates (Streamlit, Dash, Gradio, Shiny, Flask, plus `nodejs-fastapi-hello-world-app` and `e2e-chatbot-app`) are listed in `CLASSIC_TEMPLATES` in `.scripts/templates.py`. Each has `app.yaml` + `manifest.yaml` + `requirements.txt`.
+
+- **`README.md` and `databricks.yml` are generated** from `manifest.yaml` + `app.yaml` by `.scripts/generate-classic-docs.py`. Don't edit them directly; change the generator (or the manifest) and rerun:
+  ```bash
+  uv run --no-project --with pyyaml python .scripts/generate-classic-docs.py
+  ```
+  A `README.md` without the `GENERATED` marker (e.g. `nodejs-fastapi-hello-world-app`) is hand-written and left alone.
+- **Smoke tests** live in `.scripts/classic-app-tests/` (no workspace needed): requirements resolve on Python 3.11, the `app.yaml` command boots and serves HTTP 200, and `databricks.yml` matches `databricks bundle schema`. Templates that call Databricks APIs at import time are in `NEEDS_WORKSPACE_TO_BOOT` and skip the boot check.
+  ```bash
+  cd .scripts/classic-app-tests && uv run pytest -v -n 8
+  ```
+- CI: `.github/workflows/classic-app-smoke.yml` runs these on PRs and weekly (catches breaking upstream releases, since `requirements.txt` use version ranges) and fails if generated files are stale.
+- Unbounded requirements are capped at the major version that resolved when they were last checked; shiny templates pin `htmltools<0.7` (0.7 breaks shiny 1.1 express UI).
+
 ## Editing Workflow Summary
 
 1. **Changing a shared script** (`quickstart.py`, `start_app.py`, `evaluate_agent.py`) — edit in `.scripts/source/`, run `uv run python .scripts/sync-scripts.py`
 2. **Changing a skill** — edit in `.claude/skills/`, run `uv run python .scripts/sync-skills.py`
 3. **Changing template-specific agent code** — edit directly in `{template}/agent_server/`
 4. **Adding a new template** — add to `.scripts/templates.py`, create directory, run both sync commands
-5. **Changing `databricks.yml`** — edit directly in the template (not synced)
+5. **Changing `databricks.yml`** — edit directly in agent templates (not synced); for classic templates, edit `.scripts/generate-classic-docs.py` and rerun it
 6. **After any change** — run e2e tests: `cd .scripts/agent-integration-tests && uv run pytest test_e2e.py -v -n 8 --skip-deploy`
 7. **After any change** — review this file (`.claude/AGENTS.md`) and each affected template's `AGENTS.md` for inaccuracies, then update them to reflect the new state

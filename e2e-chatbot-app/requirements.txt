@@ -1,2 +1,2 @@
-mlflow>=2.21.2
+mlflow>=2.21.2,<4
 streamlit==1.44.1
