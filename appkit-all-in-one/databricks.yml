@@ -30,9 +30,9 @@ resources:
       lifecycle:
         started: true
       user_api_scopes:
-        - dashboards.genie
-        - files.files
-        - serving.serving-endpoints
+        - genie
+        - files
+        - model-serving
 
       # The resources which this app has access to.
       resources:

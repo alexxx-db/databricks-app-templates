@@ -18,7 +18,7 @@ resources:
       lifecycle:
         started: true
       user_api_scopes:
-        - dashboards.genie
+        - genie
 
       # The resources which this app has access to.
       resources:

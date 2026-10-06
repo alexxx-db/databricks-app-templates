@@ -18,7 +18,7 @@ resources:
       lifecycle:
         started: true
       user_api_scopes:
-        - files.files
+        - files
 
       # The resources which this app has access to.
       resources:

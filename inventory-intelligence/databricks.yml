@@ -60,7 +60,7 @@ resources:
       description: "Retail inventory management with AI-powered demand forecasting and replenishment recommendations"
       source_code_path: ./
       user_api_scopes:
-        - dashboards.genie
+        - genie
       resources:
         - name: sql-warehouse
           sql_warehouse:

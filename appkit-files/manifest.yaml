@@ -10,4 +10,4 @@ resource_specs:
       permission: "WRITE_VOLUME"
 
 user_api_scopes:
-  - "files.files"
+  - "files"

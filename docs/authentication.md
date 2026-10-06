@@ -78,7 +78,7 @@ Current scope names ([docs](https://docs.databricks.com/aws/en/dev-tools/databri
 | `catalog.catalogs`, `catalog.schemas`, `catalog.tables`, `catalog.connections`, `workspace.workspace` | SDK access to those objects (add `:read` for read-only) |
 | `iam.current-user:read`, `iam.access-control:read` | Granted by default; who the user is and their permissions, no data access |
 
-**Renamed scopes.** Older names are deprecated: `dashboards.genie` → `genie`, `files.files` → `files`, `serving.serving-endpoints` → `model-serving`, and the `sql.*` variants → `sql`. Several AppKit and showcase templates in this repo still use the old names; prefer the new ones in new apps.
+**Renamed scopes.** Older names are deprecated: `dashboards.genie` → `genie`, `files.files` → `files`, `serving.serving-endpoints` → `model-serving`, and the `sql.*` variants → `sql`. All templates in this repo use the new names. (The `appkit-*` templates are regenerated from AppKit upstream; AppKit 0.65.0's `appkit add` CLI still suggests the old names in a warning.)
 
 Workspace admins can restrict which scopes apps may request. If deploying fails with `user token passthrough not enabled`, user authorization isn't enabled for apps in that workspace; ask an admin.
 

@@ -9,4 +9,4 @@ resource_specs:
       permission: "CAN_VIEW"
 
 user_api_scopes:
-  - "dashboards.genie"
+  - "genie"

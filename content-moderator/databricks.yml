@@ -18,7 +18,7 @@ resources:
       description: "Internal content moderation tool with AI-powered compliance scoring"
       source_code_path: ./
       user_api_scopes:
-        - dashboards.genie
+        - genie
       resources:
         - name: sql-warehouse
           sql_warehouse:

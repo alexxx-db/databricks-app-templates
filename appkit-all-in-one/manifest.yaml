@@ -22,5 +22,5 @@ resource_specs:
       permission: "CAN_CONNECT_AND_CREATE"
 
 user_api_scopes:
-  - "dashboards.genie"
-  - "files.files"
+  - "genie"
+  - "files"

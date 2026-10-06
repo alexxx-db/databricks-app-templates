@@ -18,7 +18,7 @@ resources:
       description: "Internal SaaS subscription tracker with spend analytics"
       source_code_path: ./
       user_api_scopes:
-        - dashboards.genie
+        - genie
       resources:
         - name: sql-warehouse
           sql_warehouse:
