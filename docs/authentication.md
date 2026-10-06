@@ -9,7 +9,7 @@ Every Databricks App can call Databricks APIs as one of two identities. Picking 
 | Credentials | `DATABRICKS_CLIENT_ID` / `DATABRICKS_CLIENT_SECRET`, injected automatically | `x-forwarded-access-token` request header |
 | Setup | Declare resources; grant the service principal data access | Add user API scopes to the app |
 | Works locally? | Yes (your CLI profile stands in for the service principal) | No forwarded header locally; test once deployed |
-| Templates | Most templates | `*-data-app-obo-user`, `streamlit-group-access-app` |
+| Templates | Most templates | `*-data-app-obo-user` |
 
 **Rule of thumb:** use the service principal when every user should see the same data (shared dashboards, a team todo list, a chatbot), or for background work. Use OBO when different users must see different rows or tables, so Unity Catalog stays the single place where access is decided.
 
@@ -76,7 +76,7 @@ Current scope names ([docs](https://docs.databricks.com/aws/en/dev-tools/databri
 | `postgres` | Lakebase |
 | `apps`, `ai-functions`, `ai-gateway` | Apps, AI Functions, AI Gateway |
 | `catalog.catalogs`, `catalog.schemas`, `catalog.tables`, `catalog.connections`, `workspace.workspace` | SDK access to those objects (add `:read` for read-only) |
-| `iam.current-user:read`, `iam.access-control:read` | Granted by default; who the user is and their permissions, no data access |
+| `iam.current-user:read`, `iam.access-control:read` | Granted by default; don't request them explicitly (requesting `iam.current-user:read` fails with "not a valid scope") |
 
 **Renamed scopes.** Older names are deprecated: `dashboards.genie` → `genie`, `files.files` → `files`, `serving.serving-endpoints` → `model-serving`, and the `sql.*` variants → `sql`. All templates in this repo use the new names. (The `appkit-*` templates are regenerated from AppKit upstream; AppKit 0.65.0's `appkit add` CLI still suggests the old names in a warning.)
 
@@ -117,7 +117,7 @@ conn = sql.connect(
 - **The token only works in the app's workspace.**
 - **Streamlit reads headers once per session**, then switches to a WebSocket, so on a tab left open for a long time the token can expire. Reloading the page gets a fresh one.
 - **Redeploys can drop scopes.** Updating an app's resources replaces its configuration; check the scopes are still set after deploying.
-- **Hiding UI is not access control.** If you show or hide features by group (see `streamlit-group-access-app`), enforce the same rule wherever data is read or written, ideally with Unity Catalog grants.
+- **Hiding UI is not access control.** If you show or hide features by group (see `streamlit-group-access-app`, which reads the user from the `X-Forwarded-Email` header and their groups via SCIM, with no user scopes), enforce the same rule wherever data is read or written, ideally with Unity Catalog grants.
 - **Don't cache user data across users.** A cache keyed only by query text will serve one user's rows to another. Key caches by user (or by token), or don't cache OBO results.
 
 ## Local development

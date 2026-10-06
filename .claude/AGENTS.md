@@ -125,13 +125,13 @@ The single-file Python templates (Streamlit, Dash, Gradio, Shiny, Flask, the `st
 
 ## Python showcases
 
-`retail-customer-assistant`, `hls-clinical-explorer` and `aml-alert-triage` (listed in `PYTHON_SHOWCASES` in `.scripts/templates.py`) are Streamlit apps plus a setup Lakeflow Job. Their README and `databricks.yml` are hand-written (not generated). They get the classic smoke checks, and each has local end-to-end tests that build the data in local Spark (ANSI mode) and run the real `app.py` against it with a fake LLM:
+`retail-customer-assistant`, `hls-clinical-explorer`, `aml-alert-triage`, `city-311-operations`, `factory-oee-maintenance` and `telco-network-care` (listed in `PYTHON_SHOWCASES` in `.scripts/templates.py`) are Streamlit apps plus a setup Lakeflow Job. Their README and `databricks.yml` are hand-written (not generated). They get the classic smoke checks, and each has local end-to-end tests that build the data in local Spark (ANSI mode) and run the real `app.py` against it with a fake LLM:
 
 ```bash
 cd <showcase> && uv run --no-project --with "pyspark~=4.0" --with pytest --with-requirements requirements.txt pytest tests -q   # needs Java 17+
 ```
 
-The HLS app must never commit MIMIC data, and keeps AI summaries off for credentialed datasets unless `ALLOW_LLM_WITH_CREDENTIALED_DATA=true` (PhysioNet data use agreement). The AML app's audit trail (`alert_dispositions`) is append-only by design: status is derived from it, and maker-checker is enforced in `investigation.py`, so keep both properties when changing the workflow.
+The HLS app must never commit MIMIC data, and keeps AI summaries off for credentialed datasets unless `ALLOW_LLM_WITH_CREDENTIALED_DATA=true` (PhysioNet data use agreement). The AML app's audit trail (`alert_dispositions`) is append-only by design: status is derived from it, and maker-checker is enforced in `investigation.py`, so keep both properties when changing the workflow. The 311 app redacts PII before any model call and stores redacted text; its equity metric (`equity.py`) is tested against planted patterns, so rerun its tests after changing the generator or the SQL. The factory app's work-order guardrails (lockout/tagout always first, citations limited to the provided manual) and the telecom app's SMS rule (the model never writes amounts; credits come from `credit_for()`) are enforced in code and covered by tests.
 
 ## Guides (`docs/`)
 

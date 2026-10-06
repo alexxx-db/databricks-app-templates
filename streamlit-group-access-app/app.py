@@ -1,39 +1,40 @@
 import os
+import re
 
 import streamlit as st
 from databricks.sdk import WorkspaceClient
-from databricks.sdk.core import Config
 
 # Defined in `app.yaml`.
 ADMIN_GROUP = os.getenv("ADMIN_GROUP", "admins")
 
 
+@st.cache_resource
+def get_client() -> WorkspaceClient:
+    return WorkspaceClient()  # the app's service principal
+
+
 @st.cache_data(ttl=300, show_spinner=False)
-def user_groups(user_token: str) -> tuple[str, list[str]]:
-    """Look up the signed-in user's groups with *their* token (scope: iam.current-user:read)."""
-    w = WorkspaceClient(host=Config().host, token=user_token, auth_type="pat")
-    me = w.current_user.me()
-    return me.user_name, sorted(g.display for g in (me.groups or []) if g.display)
+def user_groups(email: str) -> list[str]:
+    """The signed-in user's workspace groups, looked up by the app's service principal (SCIM)."""
+    if not re.fullmatch(r"[^\s\"\\]+@[^\s\"\\]+", email):  # never pass odd input into the SCIM filter
+        return []
+    users = list(get_client().users.list(filter=f'userName eq "{email}"', attributes="userName,groups"))
+    return sorted(g.display for g in (users[0].groups or []) if g.display) if users else []
 
 
 st.set_page_config(page_title="Group access", layout="wide")
 st.header("Group access")
 
-# Databricks Apps forwards the signed-in user's token on every request.
-# Streamlit reads headers once per session; reload the page if the token expires.
-user_token = st.context.headers.get("X-Forwarded-Access-Token")
-if not user_token:
-    st.warning(
-        "No user token in the request. This happens when running locally: "
-        "deploy the app, and make sure user authorization is enabled with the "
-        "`iam.current-user:read` scope."
-    )
+# The Databricks Apps proxy sets this header to the signed-in user's email on every request.
+email = st.context.headers.get("X-Forwarded-Email") or os.getenv("LOCAL_USER_EMAIL", "")
+if not email:
+    st.warning("No signed-in user. When running locally, set LOCAL_USER_EMAIL to try a user's groups.")
     st.stop()
 
-user, groups = user_groups(user_token)
+groups = user_groups(email)
 is_admin = ADMIN_GROUP in groups
 
-st.write(f"Signed in as **{user}**")
+st.write(f"Signed in as **{email}**")
 st.write("Groups: " + (", ".join(f"`{g}`" for g in groups) or "none"))
 
 st.subheader("Everyone")
@@ -46,5 +47,5 @@ if is_admin:
 else:
     st.info(f"Only members of `{ADMIN_GROUP}` can see this section.")
 
-# Hiding UI is not access control: enforce the same rule wherever data is read or
-# written (Unity Catalog grants, or checks like `is_admin` in your handlers).
+# Hiding UI is not access control: enforce the same rule wherever data is read or written
+# (Unity Catalog grants, or checks like `is_admin` in your handlers).

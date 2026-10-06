@@ -7,27 +7,23 @@ Show or hide app features based on the signed-in user's workspace group membersh
 | | |
 |---|---|
 | Framework | Streamlit |
-| Runs as | On-behalf-of user (scopes: `iam.current-user:read`) |
+| Runs as | App service principal |
 | Resources | None |
 
 ## Setup
 
-- User authorization must be enabled for apps in the workspace (ask an admin if deploy
-  fails with `user token passthrough not enabled`).
+- The signed-in user comes from the `X-Forwarded-Email` header that the Databricks Apps proxy sets;
+  their groups are looked up by the app's service principal through the SCIM Users API. No user
+  API scopes are needed.
 - Set `ADMIN_GROUP` in `app.yaml` to the workspace group that sees the admin section.
 - Hiding UI is not access control: enforce the same rule wherever data is read or
   written (Unity Catalog grants, or the `is_admin` check in your handlers).
-- Streamlit reads request headers once per session, so the user token can go stale
-  on a long-open tab; reloading the page refreshes it.
+- Locally there is no proxy: set `LOCAL_USER_EMAIL` to look up a user's groups with your own credentials.
 
 ## How it authenticates
 
-Queries run **as the signed-in user**. Databricks forwards the user's token in the
-`X-Forwarded-Access-Token` header, so Unity Catalog permissions are enforced per user.
-
-- The app needs the user API scopes above (declared in `databricks.yml` / set in the UI).
-- A workspace admin may need to enable user authorization for apps.
-- Locally there is no forwarded header, so the on-behalf-of path only works once deployed.
+The app runs as its own **service principal**. Databricks injects its OAuth credentials
+(`DATABRICKS_CLIENT_ID` / `DATABRICKS_CLIENT_SECRET`) and the SDK picks them up automatically.
 
 ## Run locally
 

@@ -140,8 +140,12 @@ def grant_app_access(spark, catalog: str, schema: str, app_name: str) -> str:
     from databricks.sdk import WorkspaceClient
 
     sp = WorkspaceClient().apps.get(app_name).service_principal_client_id
+    try:  # needs MANAGE on the catalog; many catalogs already grant USE CATALOG to account users
+        spark.sql(f"GRANT USE CATALOG ON CATALOG `{catalog}` TO `{sp}`")
+    except Exception as e:
+        print(f"Warning: couldn't grant USE CATALOG on {catalog} ({e.__class__.__name__}). "
+              f"Make sure the app's service principal {sp} has USE CATALOG there.")
     for stmt in [
-        f"GRANT USE CATALOG ON CATALOG `{catalog}` TO `{sp}`",
         f"GRANT USE SCHEMA, SELECT ON SCHEMA `{catalog}`.`{schema}` TO `{sp}`",
         # The assistant files return requests.
         f"GRANT MODIFY ON TABLE `{catalog}`.`{schema}`.returns TO `{sp}`",

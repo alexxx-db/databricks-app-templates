@@ -9,8 +9,6 @@ resources:
       name: streamlit-group-access
       description: Show or hide app features based on the signed-in user's workspace group membership.
       source_code_path: ./
-      user_api_scopes:
-      - iam.current-user:read
 targets:
   dev:
     mode: development

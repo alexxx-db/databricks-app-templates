@@ -213,7 +213,11 @@ def main() -> None:
         from databricks.sdk import WorkspaceClient
 
         sp = WorkspaceClient().apps.get(args.app_name).service_principal_client_id
-        spark.sql(f"GRANT USE CATALOG ON CATALOG `{args.catalog}` TO `{sp}`")
+        try:  # needs MANAGE on the catalog; many catalogs already grant USE CATALOG to account users
+            spark.sql(f"GRANT USE CATALOG ON CATALOG `{args.catalog}` TO `{sp}`")
+        except Exception as e:
+            print(f"Warning: couldn't grant USE CATALOG on {args.catalog} ({e.__class__.__name__}). "
+                  f"Make sure the app's service principal {sp} has USE CATALOG there.")
         spark.sql(f"GRANT USE SCHEMA, SELECT ON SCHEMA {fqn} TO `{sp}`")
         print(f"Granted read access to {sp}")
 
