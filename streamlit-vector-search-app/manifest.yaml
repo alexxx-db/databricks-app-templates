@@ -1,0 +1,10 @@
+version: 1
+name: "Vector Search app"
+description: "Semantic search over a Databricks Vector Search index."
+
+resource_specs:
+  - name: "vector-search-index"
+    description: "The Vector Search index to query (a Delta Sync index with managed embeddings supports text queries)."
+    uc_securable_spec:
+      securable_type: "TABLE"
+      permission: "SELECT"

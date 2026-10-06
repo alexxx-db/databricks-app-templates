@@ -1,0 +1,9 @@
+version: 1
+name: "Synced table lookup app"
+description: "Sub-second typeahead search over a Unity Catalog table synced into Lakebase Autoscaling Postgres."
+
+resource_specs:
+  - name: "postgres"
+    description: "The Lakebase Autoscaling database that holds the synced table."
+    postgres_spec:
+      permission: "CAN_CONNECT_AND_CREATE"

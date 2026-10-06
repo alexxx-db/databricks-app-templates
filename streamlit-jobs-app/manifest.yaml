@@ -1,0 +1,9 @@
+version: 1
+name: "Jobs app"
+description: "Trigger a Lakeflow Job with parameters, watch its runs, and read task output."
+
+resource_specs:
+  - name: "job"
+    description: "The Lakeflow Job the app triggers and monitors."
+    job_spec:
+      permission: "CAN_MANAGE_RUN"

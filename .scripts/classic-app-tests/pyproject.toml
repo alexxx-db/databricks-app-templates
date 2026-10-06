@@ -1,12 +1,16 @@
 [project]
 name = "classic-app-tests"
 version = "0.1.0"
-requires-python = ">=3.11"
+requires-python = ">=3.11,<3.13"
 dependencies = [
     "pytest>=8",
     "pytest-xdist>=3",
     "pyyaml>=6",
     "jsonschema>=4",
+    # for test_app_logic.py (runs Streamlit templates in-process)
+    "streamlit~=1.38.0",
+    "databricks-sdk>=0.81.0,<1",
+    "pandas~=2.2.3",
 ]
 
 [tool.uv]

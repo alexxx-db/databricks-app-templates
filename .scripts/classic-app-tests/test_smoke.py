@@ -47,6 +47,9 @@ DUMMY_ENV = {
     "PGDATABASE": "dummy",
     "PGUSER": "dummy",
     "PGAPPNAME": "dummy",
+    "DATABRICKS_JOB_ID": "1",
+    "DATABRICKS_VOLUME_PATH": "/Volumes/dummy/dummy/dummy",
+    "VECTOR_SEARCH_INDEX": "dummy.dummy.dummy",
     "STREAMLIT_SERVER_HEADLESS": "true",
     "STREAMLIT_BROWSER_GATHER_USAGE_STATS": "false",
 }

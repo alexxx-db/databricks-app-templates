@@ -66,6 +66,11 @@ CLASSIC_TEMPLATES = [
     "streamlit-data-app",
     "streamlit-data-app-obo-user",
     "streamlit-database-app",
+    "streamlit-files-app",
+    "streamlit-group-access-app",
     "streamlit-hello-world-app",
+    "streamlit-jobs-app",
     "streamlit-postgres-app",
+    "streamlit-synced-table-app",
+    "streamlit-vector-search-app",
 ]

@@ -1,0 +1,6 @@
+version: 1
+name: "Group access app"
+description: "Show or hide app features based on the signed-in user's workspace group membership."
+
+user_api_scopes:
+  - "iam.current-user:read"

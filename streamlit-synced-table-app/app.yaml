@@ -1,0 +1,11 @@
+command: ["streamlit", "run", "app.py"]
+env:
+  - name: STREAMLIT_BROWSER_GATHER_USAGE_STATS
+    value: "false"
+  - name: PGENDPOINT
+    valueFrom: postgres
+  # TODO: the synced table in Postgres (<schema>.<table>) and the text column to search.
+  - name: SYNCED_TABLE
+    value: "public.products_synced"
+  - name: SEARCH_COLUMN
+    value: "name"

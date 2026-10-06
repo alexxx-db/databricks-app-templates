@@ -16,6 +16,11 @@ See [Create an App from a Template](https://docs.databricks.com/aws/en/dev-tools
 | Chat UI over a model or agent endpoint | `e2e-chatbot-app-next` (full-featured) or a `*-chatbot-app` (minimal Python) |
 | Agent with tools, memory, evaluation | `agent-langgraph` or `agent-openai-agents-sdk` (add `-advanced` for memory) |
 | Natural-language questions over data | `appkit-genie` |
+| Trigger and monitor a Lakeflow Job | `streamlit-jobs-app` |
+| Upload / download files in a UC volume | `appkit-files` (TypeScript) or `streamlit-files-app` (Python) |
+| Semantic search over documents | `streamlit-vector-search-app` |
+| Sub-second lookups / typeahead over lakehouse data | `streamlit-synced-table-app` (Lakebase synced table) |
+| Show features by user group | `streamlit-group-access-app` |
 | Expose tools to AI clients | `mcp-server-hello-world` |
 | See a complete reference solution | a [showcase example](#showcase-examples) |
 
@@ -91,6 +96,18 @@ Every Python template's README covers its resources, permissions, local run and 
 | `gradio-chatbot-app` | A minimal chat UI for an LLM on Databricks Model Serving | Serving endpoint |
 | `shiny-chatbot-app` | A minimal chat UI for an LLM on Databricks Model Serving | Serving endpoint |
 | `e2e-chatbot-app` | Earlier Streamlit chat UI for agent and foundation-model endpoints; prefer `e2e-chatbot-app-next` for new work | Serving endpoint |
+
+### Integrations
+
+Python examples of individual platform features, each in a single `app.py`.
+
+| Template | Description | Dependencies |
+|----------|-------------|--------------|
+| `streamlit-jobs-app` | Trigger a Lakeflow Job with parameters, watch its runs, and read task output | Job |
+| `streamlit-files-app` | Browse, upload, download, and delete files in a Unity Catalog volume | UC volume |
+| `streamlit-vector-search-app` | Semantic search over a Databricks Vector Search index | Vector Search index |
+| `streamlit-synced-table-app` | Sub-second typeahead search over a UC table synced into Lakebase | Database |
+| `streamlit-group-access-app` | Show or hide features based on the signed-in user's workspace groups | User API scope `iam.current-user:read` |
 
 ### AppKit
 

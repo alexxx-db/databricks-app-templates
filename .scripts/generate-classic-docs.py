@@ -98,6 +98,83 @@ RESOURCE_TYPES = {
             "export PGUSER=<your-databricks-username> PGSSLMODE=require PGAPPNAME=local"
         ),
     },
+    "job_spec": {
+        "label": "Lakeflow Job",
+        "vars": {"job_id": "Job ID (`databricks jobs list`)"},
+        "bundle": lambda p: {"job": {"id": "${var.job_id}", "permission": p}},
+        "local": "export DATABRICKS_JOB_ID=<job-id>   # databricks jobs list",
+    },
+    # uc_securable_spec is keyed by securable type, see load().
+    "uc_securable_spec:VOLUME": {
+        "label": "Unity Catalog volume",
+        "vars": {"volume_full_name": "Volume full name: <catalog>.<schema>.<volume>"},
+        "bundle": lambda p: {
+            "uc_securable": {
+                "securable_full_name": "${var.volume_full_name}",
+                "securable_type": "VOLUME",
+                "permission": p,
+            }
+        },
+        "local": "export DATABRICKS_VOLUME_PATH=/Volumes/<catalog>/<schema>/<volume>",
+    },
+    "uc_securable_spec:TABLE": {
+        "label": "Vector Search index",
+        "vars": {"vector_search_index": "Vector Search index full name: <catalog>.<schema>.<index>"},
+        "bundle": lambda p: {
+            "uc_securable": {
+                "securable_full_name": "${var.vector_search_index}",
+                "securable_type": "TABLE",
+                "permission": p,
+            }
+        },
+        "local": "export VECTOR_SEARCH_INDEX=<catalog>.<schema>.<index>",
+    },
+}
+
+# Extra README section for templates that need setup beyond declaring resources.
+SETUP_NOTES = {
+    "streamlit-jobs-app": [
+        "- Pick any job; the app reads its job parameters and shows them as inputs.",
+        "- Task output shown per task: notebook tasks return the value passed to",
+        "  `dbutils.notebook.exit(\"...\")`; other task types show logs or errors.",
+        "- The runs table refreshes every 5 seconds (`st.fragment(run_every=...)`).",
+    ],
+    "streamlit-files-app": [
+        "- All paths are resolved inside the volume; names like `../x` are rejected.",
+        "- Uploads overwrite files with the same name. Deletes require a confirmation tick.",
+        "- Streamlit's default upload limit is 200 MB per file (`server.maxUploadSize`).",
+    ],
+    "streamlit-vector-search-app": [
+        "- Text queries need a **Delta Sync index with managed embeddings**. For self-managed",
+        "  embeddings, compute the query vector yourself and pass `query_vector` instead.",
+        "- Returned columns default to the primary key + the embedding source column;",
+        "  set `VECTOR_SEARCH_COLUMNS` in `app.yaml` to choose others.",
+    ],
+    "streamlit-synced-table-app": [
+        "1. Create a synced table from a Unity Catalog table into the Lakebase database",
+        "   (*Catalog Explorer → table → Create → Synced table*).",
+        "2. Set `SYNCED_TABLE` (`<postgres-schema>.<table>`) and `SEARCH_COLUMN` in `app.yaml`.",
+        "3. After the first deploy, let the app's service principal read the table. In the",
+        "   Lakebase SQL editor, as the table owner (the role name is the app's service",
+        "   principal client ID, shown on the app's *Authorization* tab):",
+        "   ```sql",
+        "   GRANT USAGE ON SCHEMA <schema> TO \"<app-service-principal-client-id>\";",
+        "   GRANT SELECT ON <schema>.<table> TO \"<app-service-principal-client-id>\";",
+        "   ```",
+        "4. For fast prefix search on large tables, add an index:",
+        "   `CREATE INDEX ON <schema>.<table> (<column> text_pattern_ops);`",
+        "",
+        "Use this pattern for typeahead and lookups by key. For dashboards and aggregations,",
+        "query the SQL warehouse instead (see `streamlit-data-app`).",
+    ],
+    "streamlit-group-access-app": [
+        "- A workspace admin must enable user authorization for apps (Public Preview).",
+        "- Set `ADMIN_GROUP` in `app.yaml` to the workspace group that sees the admin section.",
+        "- Hiding UI is not access control: enforce the same rule wherever data is read or",
+        "  written (Unity Catalog grants, or the `is_admin` check in your handlers).",
+        "- Streamlit reads request headers once per session, so the user token can go stale",
+        "  on a long-open tab; reloading the page refreshes it.",
+    ],
 }
 
 
@@ -109,16 +186,19 @@ def load(template: str) -> dict:
     resources = []
     for spec in manifest.get("resource_specs", []):
         kind = next(k for k in spec if k.endswith("_spec"))
+        permission = spec[kind]["permission"]
+        if kind == "uc_securable_spec":
+            kind += ":" + spec[kind]["securable_type"]
         resources.append(
             {
                 "name": spec["name"],
                 "kind": kind,
-                "permission": spec[kind]["permission"],
+                "permission": permission,
                 "description": spec.get("description", ""),
                 "env": env_by_resource.get(spec["name"]),
             }
         )
-    files = subprocess.check_output(["git", "ls-files"], cwd=d, text=True).split()
+    files = subprocess.check_output(["git", "ls-files", "--cached", "--others", "--exclude-standard"], cwd=d, text=True).split()
     return {
         "template": template,
         "framework": FRAMEWORKS[template.split("-")[0]],
@@ -191,6 +271,9 @@ def render_readme(t: dict) -> str:
             out += [f"| `{r['name']}` | {RESOURCE_TYPES[r['kind']]['label']} | `{r['permission']}` | {env} |"]
         out += [""] + [f"- **`{r['name']}`**: {r['description']}" for r in res] + [""]
 
+    if t["template"] in SETUP_NOTES:
+        out += ["## Setup", "", *SETUP_NOTES[t["template"]], ""]
+
     out += ["## How it authenticates", ""]
     if obo:
         out += [
@@ -222,7 +305,7 @@ def render_readme(t: dict) -> str:
                 "GRANT SELECT ON TABLE <catalog>.<schema>.<table> TO `<app-service-principal-id>`;",
                 "```",
             ]
-        if any(r["kind"] in ("database_spec", "postgres_spec") for r in res):
+        if t["template"].endswith(("-database-app", "-postgres-app")):
             out += ["On first start the app creates its own schema and `todos` table in the database."]
     out += [""]
 

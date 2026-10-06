@@ -1,3 +1,4 @@
+import secrets
 from flask import Flask, render_template, request, redirect, url_for, flash
 import psycopg
 import os
@@ -132,7 +133,9 @@ def delete_todo(todo_id):
 
 # Initialize Flask app
 app = Flask(__name__)
-app.secret_key = os.getenv('SECRET_KEY', 'dev-secret-key')
+# Signs session cookies (flash messages). Set SECRET_KEY from a secret resource to keep
+# sessions across restarts; otherwise a random key is generated per process.
+app.secret_key = os.getenv('SECRET_KEY') or secrets.token_hex(32)
 
 # Initialize database
 if not init_database():

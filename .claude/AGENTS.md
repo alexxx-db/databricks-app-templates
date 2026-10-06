@@ -107,14 +107,16 @@ Template test configs are in `.scripts/agent-integration-tests/template_config.p
 
 ## Classic Python Templates
 
-The single-file Python templates (Streamlit, Dash, Gradio, Shiny, Flask, plus `nodejs-fastapi-hello-world-app` and `e2e-chatbot-app`) are listed in `CLASSIC_TEMPLATES` in `.scripts/templates.py`. Each has `app.yaml` + `manifest.yaml` + `requirements.txt`.
+The single-file Python templates (Streamlit, Dash, Gradio, Shiny, Flask, the `streamlit-*` integration examples for jobs/files/vector search/synced tables/group access, plus `nodejs-fastapi-hello-world-app` and `e2e-chatbot-app`) are listed in `CLASSIC_TEMPLATES` in `.scripts/templates.py`. Each has `app.yaml` + `manifest.yaml` + `requirements.txt`.
 
 - **`README.md` and `databricks.yml` are generated** from `manifest.yaml` + `app.yaml` by `.scripts/generate-classic-docs.py`. Don't edit them directly; change the generator (or the manifest) and rerun:
   ```bash
   uv run --no-project --with pyyaml python .scripts/generate-classic-docs.py
   ```
+  New resource types go in `RESOURCE_TYPES` (`uc_securable_spec` is keyed by securable type, e.g. `uc_securable_spec:VOLUME`); extra per-template setup steps go in `SETUP_NOTES`.
   A `README.md` without the `GENERATED` marker (e.g. `nodejs-fastapi-hello-world-app`) is hand-written and left alone.
 - **Smoke tests** live in `.scripts/classic-app-tests/` (no workspace needed): requirements resolve on Python 3.11, the `app.yaml` command boots and serves HTTP 200, and `databricks.yml` matches `databricks bundle schema`. Templates that call Databricks APIs at import time are in `NEEDS_WORKSPACE_TO_BOOT` and skip the boot check.
+  `test_app_logic.py` also compiles every template and runs app-level checks with Streamlit's `AppTest` and a mocked `WorkspaceClient` (Streamlit only executes `app.py` when a session connects, so the boot test can't see script errors).
   ```bash
   cd .scripts/classic-app-tests && uv run pytest -v -n 8
   ```

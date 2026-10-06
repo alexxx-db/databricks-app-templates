@@ -43,9 +43,9 @@ Use `-t prod` for a production deploy. Run `databricks bundle summary -t dev` to
 |---|---|
 | `app.py` | UI and app logic: start here |
 | `app.yaml` | Runtime command and env vars wired from resources |
+| `databricks.yml` | Bundle definition for CLI / CI deploys |
 | `manifest.yaml` | Template metadata shown in the Databricks UI |
 | `requirements.txt` | Python dependencies installed on deploy |
-| `databricks.yml` | Bundle definition for CLI / CI deploys |
 
 ## Testing
 

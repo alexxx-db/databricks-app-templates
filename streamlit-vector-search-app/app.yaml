@@ -1,0 +1,9 @@
+command: ["streamlit", "run", "app.py"]
+env:
+  - name: STREAMLIT_BROWSER_GATHER_USAGE_STATS
+    value: "false"
+  - name: VECTOR_SEARCH_INDEX
+    valueFrom: vector-search-index
+  # Optional: comma-separated columns to return. Defaults to the index's primary key + text column.
+  # - name: VECTOR_SEARCH_COLUMNS
+  #   value: "id,title,body"
