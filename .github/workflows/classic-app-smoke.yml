@@ -10,6 +10,7 @@ on:
       - "*-app-obo-user/**"
       - "retail-customer-assistant/**"
       - "hls-clinical-explorer/**"
+      - "aml-alert-triage/**"
       - ".scripts/templates.py"
       - ".scripts/generate-classic-docs.py"
       - ".scripts/classic-app-tests/**"
@@ -40,7 +41,7 @@ jobs:
     timeout-minutes: 30
     strategy:
       matrix:
-        template: [retail-customer-assistant, hls-clinical-explorer]
+        template: [retail-customer-assistant, hls-clinical-explorer, aml-alert-triage]
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6

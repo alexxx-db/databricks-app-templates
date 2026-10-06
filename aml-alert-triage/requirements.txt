@@ -1,0 +1,5 @@
+streamlit~=1.65
+databricks-sdk>=0.81.0,<1
+databricks-sql-connector>=4,<5
+openai>=2,<3
+pandas>=2.2,<3

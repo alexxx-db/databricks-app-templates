@@ -1,0 +1,82 @@
+# AML alert triage: app + setup job + nightly detection job.
+#
+#   databricks bundle deploy -t dev --var sql_warehouse_id=<id>
+#   databricks bundle run setup -t dev     # generate data, run detection, grant the app access
+#   databricks bundle run app -t dev       # start the app
+bundle:
+  name: aml-alert-triage
+
+variables:
+  sql_warehouse_id:
+    description: SQL warehouse ID (`databricks warehouses list`)
+  serving_endpoint_name:
+    description: Chat model endpoint for SAR narrative drafts (a Databricks-hosted model by default)
+    default: databricks-meta-llama-3-3-70b-instruct
+  catalog:
+    description: Catalog for the demo tables (must exist)
+    default: main
+  schema:
+    description: Schema for the demo tables (created by the setup job). Keep AML_SCHEMA in app.yaml in sync.
+    default: aml_monitoring
+
+resources:
+  apps:
+    app:
+      name: aml-alert-triage
+      description: AML transaction monitoring with an analyst investigation workflow, maker-checker and audit trail.
+      source_code_path: ./
+      resources:
+        - name: sql-warehouse
+          sql_warehouse:
+            id: ${var.sql_warehouse_id}
+            permission: CAN_USE
+        - name: serving-endpoint
+          serving_endpoint:
+            name: ${var.serving_endpoint_name}
+            permission: CAN_QUERY
+
+  jobs:
+    setup:
+      name: aml-alert-triage-setup
+      tasks:
+        - task_key: generate_data
+          spark_python_task:
+            python_file: ./setup/generate_data.py
+            parameters: [--catalog, "${var.catalog}", --schema, "${var.schema}"]
+          environment_key: default
+        - task_key: detect
+          depends_on:
+            - task_key: generate_data
+          spark_python_task:
+            python_file: ./setup/detect.py
+            parameters: [--catalog, "${var.catalog}", --schema, "${var.schema}", --app-name, "${resources.apps.app.name}"]
+          environment_key: default
+      environments:
+        - environment_key: default
+          spec:
+            environment_version: "3"
+
+    # How detection runs in production: re-scan transactions every night. Unpause the schedule to use it.
+    nightly_detection:
+      name: aml-alert-triage-nightly-detection
+      schedule:
+        quartz_cron_expression: "0 0 2 * * ?"
+        timezone_id: UTC
+        pause_status: PAUSED
+      tasks:
+        - task_key: detect
+          spark_python_task:
+            python_file: ./setup/detect.py
+            parameters: [--catalog, "${var.catalog}", --schema, "${var.schema}", --seed-history, "false"]
+          environment_key: default
+      environments:
+        - environment_key: default
+          spec:
+            environment_version: "3"
+
+targets:
+  dev:
+    mode: development
+    default: true
+  prod:
+    mode: production
