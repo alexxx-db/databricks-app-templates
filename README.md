@@ -35,6 +35,15 @@ See [Create an App from a Template](https://docs.databricks.com/aws/en/dev-tools
 
 Every Python template's README covers its resources, permissions, local run and deploy steps, and each ships a `databricks.yml` for CLI/CI deploys (`databricks bundle deploy -t dev`).
 
+## Guides
+
+Cross-cutting guides for building and running apps, whichever template you start from:
+
+- [Authentication](docs/authentication.md): app service principal vs. on behalf of the user, scopes, code per framework
+- [Resources and permissions](docs/resources-and-permissions.md): what each resource grants, what's injected, what you still have to grant
+- [Production checklist](docs/production-checklist.md): configuration, dependencies, runtime behavior, sizing, cost, limits, monitoring, CI/CD
+- [Troubleshooting](docs/troubleshooting.md): symptoms, causes and fixes
+
 ## Templates
 
 ### Hello World

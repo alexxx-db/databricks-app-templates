@@ -168,7 +168,8 @@ SETUP_NOTES = {
         "query the SQL warehouse instead (see `streamlit-data-app`).",
     ],
     "streamlit-group-access-app": [
-        "- A workspace admin must enable user authorization for apps (Public Preview).",
+        "- User authorization must be enabled for apps in the workspace (ask an admin if deploy",
+        "  fails with `user token passthrough not enabled`).",
         "- Set `ADMIN_GROUP` in `app.yaml` to the workspace group that sees the admin section.",
         "- Hiding UI is not access control: enforce the same rule wherever data is read or",
         "  written (Unity Catalog grants, or the `is_admin` check in your handlers).",
@@ -355,6 +356,11 @@ def render_readme(t: dict) -> str:
         "",
         "`.scripts/classic-app-tests/` checks that `requirements.txt` resolves, that the app boots (when it",
         "can start without a workspace), and that `databricks.yml` matches the bundle schema.",
+        "",
+        "## More",
+        "",
+        "[Authentication](../docs/authentication.md) · [Resources and permissions](../docs/resources-and-permissions.md) · "
+        "[Production checklist](../docs/production-checklist.md) · [Troubleshooting](../docs/troubleshooting.md)",
         "",
     ]
     return "\n".join(out)

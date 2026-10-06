@@ -70,3 +70,7 @@ Use `-t prod` for a production deploy. Run `databricks bundle summary -t dev` to
 
 `.scripts/classic-app-tests/` checks that `requirements.txt` resolves, that the app boots (when it
 can start without a workspace), and that `databricks.yml` matches the bundle schema.
+
+## More
+
+[Authentication](../docs/authentication.md) · [Resources and permissions](../docs/resources-and-permissions.md) · [Production checklist](../docs/production-checklist.md) · [Troubleshooting](../docs/troubleshooting.md)

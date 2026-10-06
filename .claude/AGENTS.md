@@ -123,6 +123,10 @@ The single-file Python templates (Streamlit, Dash, Gradio, Shiny, Flask, the `st
 - CI: `.github/workflows/classic-app-smoke.yml` runs these on PRs and weekly (catches breaking upstream releases, since `requirements.txt` use version ranges) and fails if generated files are stale.
 - Unbounded requirements are capped at the major version that resolved when they were last checked; shiny templates pin `htmltools<0.7` (0.7 breaks shiny 1.1 express UI).
 
+## Guides (`docs/`)
+
+`docs/` holds hand-written, cross-cutting guides (authentication, resources and permissions, production checklist, troubleshooting) linked from the top-level README and every generated classic README. When a change affects platform behavior they describe (scopes, resource types, limits, a new failure mode), update the guide too. Facts there were checked against docs.databricks.com and `databricks bundle schema`; mark anything inferred or observed as such.
+
 ## Editing Workflow Summary
 
 1. **Changing a shared script** (`quickstart.py`, `start_app.py`, `evaluate_agent.py`) — edit in `.scripts/source/`, run `uv run python .scripts/sync-scripts.py`
