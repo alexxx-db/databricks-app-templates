@@ -8,10 +8,10 @@ from unittest import mock
 import pytest
 from streamlit.testing.v1 import AppTest
 
-from test_smoke import CLASSIC_TEMPLATES, REPO_ROOT
+from test_smoke import REPO_ROOT, SMOKE_TEMPLATES
 
 
-@pytest.mark.parametrize("template", CLASSIC_TEMPLATES)
+@pytest.mark.parametrize("template", SMOKE_TEMPLATES)
 def test_python_compiles(template):
     for path in (REPO_ROOT / template).rglob("*.py"):
         if ".venv" not in path.parts:

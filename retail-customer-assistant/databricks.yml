@@ -1,0 +1,63 @@
+# Retail customer assistant: app + setup job.
+#
+#   databricks bundle deploy -t dev --var sql_warehouse_id=<id>
+#   databricks bundle run setup -t dev     # generate data, grant the app access
+#   databricks bundle run app -t dev       # start the app
+bundle:
+  name: retail-customer-assistant
+
+variables:
+  sql_warehouse_id:
+    description: SQL warehouse ID (`databricks warehouses list`)
+  serving_endpoint_name:
+    description: Chat model endpoint that supports tool calling
+    default: databricks-meta-llama-3-3-70b-instruct
+  catalog:
+    description: Catalog for the demo tables (must exist)
+    default: main
+  schema:
+    description: Schema for the demo tables (created by the setup job). Keep RETAIL_SCHEMA in app.yaml in sync.
+    default: retail_assistant
+
+resources:
+  apps:
+    app:
+      name: retail-customer-assistant
+      description: Customer service agent for an online retailer, with customer 360 and operations views.
+      source_code_path: ./
+      resources:
+        - name: sql-warehouse
+          sql_warehouse:
+            id: ${var.sql_warehouse_id}
+            permission: CAN_USE
+        - name: serving-endpoint
+          serving_endpoint:
+            name: ${var.serving_endpoint_name}
+            permission: CAN_QUERY
+
+  jobs:
+    setup:
+      name: retail-customer-assistant-setup
+      tasks:
+        - task_key: generate_data
+          spark_python_task:
+            python_file: ./setup/generate_data.py
+            parameters:
+              - --catalog
+              - ${var.catalog}
+              - --schema
+              - ${var.schema}
+              - --app-name
+              - ${resources.apps.app.name}
+          environment_key: default
+      environments:
+        - environment_key: default
+          spec:
+            environment_version: "3"
+
+targets:
+  dev:
+    mode: development
+    default: true
+  prod:
+    mode: production

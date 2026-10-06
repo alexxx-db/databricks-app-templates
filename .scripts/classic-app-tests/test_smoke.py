@@ -30,7 +30,9 @@ import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / ".scripts"))
-from templates import CLASSIC_TEMPLATES  # noqa: E402
+from templates import CLASSIC_TEMPLATES, PYTHON_SHOWCASES  # noqa: E402
+
+SMOKE_TEMPLATES = CLASSIC_TEMPLATES + PYTHON_SHOWCASES
 
 PYTHON_VERSION = "3.11"  # Databricks Apps runtime
 BOOT_TIMEOUT_S = 180  # first run includes the dependency install
@@ -50,6 +52,8 @@ DUMMY_ENV = {
     "DATABRICKS_JOB_ID": "1",
     "DATABRICKS_VOLUME_PATH": "/Volumes/dummy/dummy/dummy",
     "VECTOR_SEARCH_INDEX": "dummy.dummy.dummy",
+    "RETAIL_SCHEMA": "dummy.dummy",
+    "HLS_SCHEMA": "dummy.dummy",
     "STREAMLIT_SERVER_HEADLESS": "true",
     "STREAMLIT_BROWSER_GATHER_USAGE_STATS": "false",
 }
@@ -118,7 +122,7 @@ def _get(url: str) -> int | None:
         return None
 
 
-@pytest.mark.parametrize("template", CLASSIC_TEMPLATES)
+@pytest.mark.parametrize("template", SMOKE_TEMPLATES)
 def test_requirements_resolve(template):
     result = subprocess.run(
         ["uv", "pip", "compile", "-q", "--python-version", PYTHON_VERSION, "requirements.txt"],
@@ -129,7 +133,7 @@ def test_requirements_resolve(template):
     assert result.returncode == 0, result.stderr
 
 
-@pytest.mark.parametrize("template", CLASSIC_TEMPLATES)
+@pytest.mark.parametrize("template", SMOKE_TEMPLATES)
 def test_app_boots(template, tmp_path):
     if template in NEEDS_WORKSPACE_TO_BOOT:
         pytest.skip("calls Databricks APIs at import time; needs a live workspace")
@@ -183,7 +187,7 @@ def _bundle_schema() -> dict:
 
 
 @pytest.mark.skipif(shutil.which("databricks") is None, reason="databricks CLI not installed")
-@pytest.mark.parametrize("template", CLASSIC_TEMPLATES)
+@pytest.mark.parametrize("template", SMOKE_TEMPLATES)
 def test_bundle_schema(template):
     import jsonschema
 

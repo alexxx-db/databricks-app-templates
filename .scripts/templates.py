@@ -74,3 +74,10 @@ CLASSIC_TEMPLATES = [
     "streamlit-synced-table-app",
     "streamlit-vector-search-app",
 ]
+
+# Python showcase apps with their own README/databricks.yml (not generated) and local Spark tests.
+# Smoke-tested alongside CLASSIC_TEMPLATES; their own tests live in <template>/tests/.
+PYTHON_SHOWCASES = [
+    "hls-clinical-explorer",
+    "retail-customer-assistant",
+]

@@ -1,0 +1,78 @@
+# Clinical explorer on MIMIC: app + setup job.
+#
+#   databricks bundle deploy -t dev --var sql_warehouse_id=<id>
+#   databricks bundle run setup -t dev     # load MIMIC (open demo by default), grant the app access
+#   databricks bundle run app -t dev       # start the app
+bundle:
+  name: hls-clinical-explorer
+
+variables:
+  sql_warehouse_id:
+    description: SQL warehouse ID (`databricks warehouses list`)
+  serving_endpoint_name:
+    description: Chat model endpoint for AI summaries (a Databricks-hosted model by default)
+    default: databricks-meta-llama-3-3-70b-instruct
+  catalog:
+    description: Catalog for the MIMIC tables (must exist)
+    default: main
+  schema:
+    description: Schema for the MIMIC tables (created by the setup job). Keep HLS_SCHEMA in app.yaml in sync.
+    default: mimic_explorer
+  dataset:
+    description: "mimic-iv-demo (open, default) | mimic-iii-demo (open) | mimic-iv | mimic-iii (credentialed: set source_path)"
+    default: mimic-iv-demo
+  source_path:
+    description: "Credentialed datasets only: /Volumes/... folder with your MIMIC files"
+    default: ""
+  notes_path:
+    description: "mimic-iv only: /Volumes/... folder with MIMIC-IV-Note discharge.csv.gz"
+    default: ""
+
+resources:
+  apps:
+    app:
+      name: hls-clinical-explorer
+      description: Cohort explorer, admission timeline and AI summaries over MIMIC-IV / MIMIC-III.
+      source_code_path: ./
+      resources:
+        - name: sql-warehouse
+          sql_warehouse:
+            id: ${var.sql_warehouse_id}
+            permission: CAN_USE
+        - name: serving-endpoint
+          serving_endpoint:
+            name: ${var.serving_endpoint_name}
+            permission: CAN_QUERY
+
+  jobs:
+    setup:
+      name: hls-clinical-explorer-setup
+      tasks:
+        - task_key: load_mimic
+          spark_python_task:
+            python_file: ./setup/load_mimic.py
+            parameters:
+              - --catalog
+              - ${var.catalog}
+              - --schema
+              - ${var.schema}
+              - --dataset
+              - ${var.dataset}
+              - --source-path
+              - ${var.source_path}
+              - --notes-path
+              - ${var.notes_path}
+              - --app-name
+              - ${resources.apps.app.name}
+          environment_key: default
+      environments:
+        - environment_key: default
+          spec:
+            environment_version: "3"
+
+targets:
+  dev:
+    mode: development
+    default: true
+  prod:
+    mode: production

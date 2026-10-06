@@ -1,0 +1,13 @@
+command: ["streamlit", "run", "app.py"]
+env:
+  - name: DATABRICKS_WAREHOUSE_ID
+    valueFrom: sql-warehouse
+  - name: SERVING_ENDPOINT
+    valueFrom: serving-endpoint
+  # Must match the catalog/schema the setup job writes to (databricks.yml: var.catalog / var.schema).
+  - name: HLS_SCHEMA
+    value: "main.mimic_explorer"
+  # Credentialed MIMIC data (mimic-iv / mimic-iii) is never sent to the model unless you set this to "true"
+  # after confirming the endpoint meets PhysioNet's terms: no data retention, no training, no human review.
+  - name: ALLOW_LLM_WITH_CREDENTIALED_DATA
+    value: "false"

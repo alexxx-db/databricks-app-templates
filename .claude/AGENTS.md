@@ -123,6 +123,16 @@ The single-file Python templates (Streamlit, Dash, Gradio, Shiny, Flask, the `st
 - CI: `.github/workflows/classic-app-smoke.yml` runs these on PRs and weekly (catches breaking upstream releases, since `requirements.txt` use version ranges) and fails if generated files are stale.
 - Unbounded requirements are capped at the major version that resolved when they were last checked; shiny templates pin `htmltools<0.7` (0.7 breaks shiny 1.1 express UI).
 
+## Python showcases
+
+`retail-customer-assistant` and `hls-clinical-explorer` (listed in `PYTHON_SHOWCASES` in `.scripts/templates.py`) are Streamlit apps plus a setup Lakeflow Job. Their README and `databricks.yml` are hand-written (not generated). They get the classic smoke checks, and each has local end-to-end tests that build the data in local Spark (ANSI mode) and run the real `app.py` against it with a fake LLM:
+
+```bash
+cd <showcase> && uv run --no-project --with "pyspark~=4.0" --with pytest --with-requirements requirements.txt pytest tests -q   # needs Java 17+
+```
+
+The HLS app must never commit MIMIC data, and keeps AI summaries off for credentialed datasets unless `ALLOW_LLM_WITH_CREDENTIALED_DATA=true` (PhysioNet data use agreement).
+
 ## Guides (`docs/`)
 
 `docs/` holds hand-written, cross-cutting guides (authentication, resources and permissions, production checklist, troubleshooting) linked from the top-level README and every generated classic README. When a change affects platform behavior they describe (scopes, resource types, limits, a new failure mode), update the guide too. Facts there were checked against docs.databricks.com and `databricks bundle schema`; mark anything inferred or observed as such.

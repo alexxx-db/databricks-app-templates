@@ -47,6 +47,7 @@ Keep upstreamable changes free of client names, workspace URLs, and alexxx-db-sp
 | `fix/classic-template-deps` | Shiny `htmltools<0.7` crash fix; caps on unbounded requirements | Ready for a PR |
 | `fix/flask-secret-key` | Flask apps no longer fall back to a hardcoded session key | Ready for a PR |
 | `chore/user-api-scope-names` | `dashboards.genie` → `genie`, `files.files` → `files`, `serving.serving-endpoints` → `model-serving` | Ready for a PR (also needs the AppKit fix) |
+| `entrada/vertical-showcases` | `retail-customer-assistant`, `hls-clinical-explorer` showcases | Fork-only for now; generic enough to propose later |
 | `tier3-guides` (Tiers 1–3) | Classic template READMEs + `databricks.yml` generator, smoke tests and CI; five Streamlit integration templates; `docs/` guides | Propose in an issue first, then split into PRs |
 
 ## Vertical showcases (`entrada/`)

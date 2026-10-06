@@ -8,6 +8,8 @@ on:
     paths:
       - "*-app/**"
       - "*-app-obo-user/**"
+      - "retail-customer-assistant/**"
+      - "hls-clinical-explorer/**"
       - ".scripts/templates.py"
       - ".scripts/generate-classic-docs.py"
       - ".scripts/classic-app-tests/**"
@@ -31,3 +33,21 @@ jobs:
       - name: Smoke tests
         working-directory: .scripts/classic-app-tests
         run: uv run pytest -v -n 8
+
+  showcases:
+    # Local Spark end-to-end tests for the Python showcases (HLS downloads the open MIMIC demos).
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      matrix:
+        template: [retail-customer-assistant, hls-clinical-explorer]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Local end-to-end tests
+        working-directory: ${{ matrix.template }}
+        run: uv run --no-project --python 3.11 --with "pyspark~=4.0" --with pytest --with-requirements requirements.txt pytest tests -q
