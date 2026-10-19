@@ -1,3 +1,5 @@
+// diagnostics bootstrap: install crash/exception logging before any other import
+import './diagnostics';
 // Load environment variables FIRST before any other imports
 import './env';
 
@@ -18,7 +20,7 @@ import { sessionRouter } from './routes/session';
 import { messagesRouter } from './routes/messages';
 import { configRouter } from './routes/config';
 import { feedbackRouter } from './routes/feedback';
-import { ChatSDKError } from '@chat-template/core/errors';
+import { ChatSDKError } from '@databricks/chatbot-core/errors';
 
 // ESM-compatible __dirname
 const __filename = fileURLToPath(import.meta.url);

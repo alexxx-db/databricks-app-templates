@@ -15,7 +15,14 @@ Two complementary suites in `.scripts/agent-integration-tests/`, both **serial**
   can't false-pass — `html` templates MUST declare `expect`); `spa` asserts the
   page references built JS/CSS assets (for framework-provided SPAs with no fixed
   text, e.g. the agent chat UI); `mcp`/`api` assert non-5xx and not-login; `build`
-  runs `npm ci && npm run build` locally (no deploy). Writes `logs/validation-report.md`.
+  runs `npm ci && npm run build` locally (no deploy); `obo` deploys like `html` but
+  its `expect` must be a **success signal** that renders only if the forwarded
+  user token's downstream call succeeded (requires the shared app CREATED with the
+  OBO scopes — see Prerequisites; obo entries without `expect` are skipped). The same run also includes
+  **deployed crash-handling cases** (`test_crash_diagnostics_deployed`, verify `crash`):
+  it deploys the `crash-examples/` fixtures, confirms each CRASHES on startup, and
+  confirms the diagnostic traceback reaches `<app-url>/logz` — then restores the
+  shared app. Writes `logs/validation-report.md`.
 - **Functional e2e** (`functional_test.py`): drives each exemplar's real UI/protocol
   (Playwright etc.) `--target local` or `--target deployed`. Writes
   `logs/functional-report.md`.
@@ -41,6 +48,17 @@ See `.scripts/agent-integration-tests/AGENTS.md` for module-level detail.
    ```
    A row failing with **"app redirected to SSO login — storageState invalid/expired"**
    means re-run `auth_setup.py`.
+4. **OBO (`verify: obo`) — the shared app must be CREATED with the on-behalf-of-user
+   scopes**, not patched later. Databricks binds the forwarded-token scopes at app
+   creation: adding `user_api_scopes` to an existing app (via `apps update`) populates
+   `effective_user_api_scopes` but **never** reaches `X-Forwarded-Access-Token` — not
+   after redeploy, stop/start, or a fresh consent (verified on dogfood). Create the
+   app with `--forward-user-access-token` and the OBO scope union:
+   `sql`, `dashboards.genie`, `files.files`, `serving.serving-endpoints`,
+   `catalog.connections` (plus the resource bindings above; `catalog.connections`
+   also needs a UC connection resource, which `mcp-server-open-api-spec` requires).
+   After (re)creating the app, refresh the storageState (step 3) so its session
+   carries the new consent.
 
 ## Running
 
@@ -56,6 +74,19 @@ DATABRICKS_CONFIG_PROFILE=dogfood uv run --no-sync pytest validate_templates.py 
 
 # Only ensure the shared app exists, skip deploys
 ... --val-setup-only
+
+# Dependency-only changes (lockfile bumps): npm ci + npm run build for EVERY
+# template with a package.json, whatever its verify mode (incl. OBO). No deploy.
+... --val-force-build
+
+# ...then prove they install + serve on the Apps runtime: deploy every selected
+# template through the shared app with one verify mode (e.g. spa for build/OBO)
+... --val-verify-as spa -k test_validate_template
+
+# Changing e2e-chatbot-app-next? Its consumers (Python agents via start_app.py,
+# agent-langchain-ts via setup-ui.sh) clone it from GitHub main at startup, so a
+# plain deploy tests main's UI. Vendor this checkout's copy into them instead:
+... --val-bundle-chatbot-ui --val-template agent-langgraph --val-template agent-langchain-ts
 
 # Functional e2e (local apps on this machine)
 DATABRICKS_CONFIG_PROFILE=dogfood uv run --no-sync pytest functional_test.py -p no:xdist -v --target local

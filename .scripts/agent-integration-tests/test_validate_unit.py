@@ -30,6 +30,37 @@ def test_load_config_parses_all_templates():
     assert all(t.expect for t in cfg.templates if t.verify == "html")
 
 
+def test_obo_wiring_expect_and_click():
+    cfg = load_validation_config(DEFAULT_CONFIG_PATH, resolve_workspace_root=False)
+    obo = {t.name: t for t in cfg.templates if t.verify == "obo"}
+    # The 4 data-app-obo-user templates are wired (declare a success-signal expect);
+    # obo entries without expect are intentionally skipped at runtime (not yet wired).
+    wired = {n for n, t in obo.items() if t.expect}
+    assert wired == {
+        "streamlit-data-app-obo-user",
+        "dash-data-app-obo-user",
+        "gradio-data-app-obo-user",
+        "shiny-data-app-obo-user",
+    }
+    # Interaction-gated apps carry an obo_click control; on-load apps don't.
+    assert obo["gradio-data-app-obo-user"].obo_click == "Run Query"
+    assert obo["shiny-data-app-obo-user"].obo_click == "Run Query"
+    assert obo["streamlit-data-app-obo-user"].obo_click is None
+    assert obo["dash-data-app-obo-user"].obo_click is None
+
+
+def test_obo_click_only_valid_for_obo(tmp_path):
+    import pytest as _pytest
+
+    bad = tmp_path / "c.yaml"
+    bad.write_text(
+        "profile: p\nshared_app_name: a\nworkspace_source_root: ''\n"
+        "templates:\n  x: { verify: html, expect: 'Hi', obo_click: 'Go' }\n"
+    )
+    with _pytest.raises(AssertionError, match="obo_click is only valid"):
+        load_validation_config(bad, resolve_workspace_root=False)
+
+
 def test_empty_workspace_root_left_unresolved_when_flag_false():
     cfg = load_validation_config(DEFAULT_CONFIG_PATH, resolve_workspace_root=False)
     assert cfg.workspace_source_root == ""
@@ -301,3 +332,120 @@ def test_detects_login_page_not_app():
     assert looks_like_login_page("<html>Sign in to Databricks</html>", "https://login.databricks.com/oidc")
     assert looks_like_login_page("", "https://accounts.cloud.databricks.com/login")
     assert not looks_like_login_page("<html>My App</html>", "https://myapp.databricksapps.com/")
+
+
+def test_deploy_recover_caps_build_failures(monkeypatch):
+    import validate_templates as vt
+
+    monkeypatch.setattr(vt.time, "sleep", lambda _s: None)
+    build_err = "Error: failed to reach SUCCEEDED, got FAILED: Error building app."
+    assert vt._deploy_recover(build_err, 1, 10) is True   # one retry for a blip
+    assert vt._deploy_recover(build_err, 2, 10) is False  # then give up
+    assert vt._deploy_recover("transient 503", 2, 10) is True
+    assert vt._deploy_recover("transient 503", 10, 10) is False
+
+
+def test_build_log_entries_extracts_build_rows_oldest_first():
+    from validate_templates import build_log_entries
+
+    page = (
+        '<tbody id="logTBody">'
+        '<tr class="log-entry" data-source="BUILD"><td>t2</td><td>BUILD</td>'
+        '<td><div>permission denied for schema &quot;drizzle&quot;</div></td></tr>'
+        '<tr class="log-entry" data-source="APP"><td>t1</td><td>APP</td><td>app line</td></tr>'
+        '<tr class="log-entry" data-source="BUILD"><td>t0</td><td>BUILD</td>'
+        '<td>&gt; npm run build</td></tr>'
+        '</tbody>'
+    )
+    assert build_log_entries(page) == ["> npm run build", 'permission denied for schema "drizzle"']
+
+
+def test_deploy_recover_caps_crash_on_start(monkeypatch):
+    import validate_templates as vt
+
+    monkeypatch.setattr(vt.time, "sleep", lambda _s: None)
+    crash = "got FAILED: Error: app exited unexpectedly. Please check /logz"
+    assert vt._deploy_recover(crash, 1, 10) is True
+    assert vt._deploy_recover(crash, 2, 10) is False
+
+
+def test_resource_aware_app_yaml_aliases_files_to_shared_uc_volume():
+    from validate_transforms import resource_aware_app_yaml
+
+    out = _yaml.safe_load(resource_aware_app_yaml(
+        "command: [npm, start]\n"
+        "env:\n"
+        "  - name: DATABRICKS_VOLUME_FILES\n    valueFrom: files\n"
+        "  - name: DATABRICKS_WAREHOUSE_ID\n    valueFrom: sql-warehouse\n"
+        "resources:\n  - name: files\n"
+    ))
+    assert "resources" not in out
+    assert [e["valueFrom"] for e in out["env"]] == ["uc-volume", "sql-warehouse"]
+
+
+def test_force_build_env_unified_host(monkeypatch):
+    import validate_templates as vt
+
+    monkeypatch.setattr(vt, "_shared_app_warehouse_id", lambda _a, _p: "wh1")
+    monkeypatch.setattr(vt, "_profile_workspace_id", lambda _p: "123")
+    assert vt.force_build_env("app", "dogfood") == {
+        "DATABRICKS_CONFIG_PROFILE": "dogfood",
+        "DATABRICKS_WAREHOUSE_ID": "wh1",
+        "DATABRICKS_WORKSPACE_ID": "123",
+        "DATABRICKS_EXPERIMENTAL_IS_UNIFIED_HOST": "true",
+    }
+
+
+def test_force_build_env_plain_host_without_warehouse(monkeypatch):
+    import validate_templates as vt
+
+    monkeypatch.setattr(vt, "_shared_app_warehouse_id", lambda _a, _p: "")
+    monkeypatch.setattr(vt, "_profile_workspace_id", lambda _p: "")
+    assert vt.force_build_env("app", "dev") == {"DATABRICKS_CONFIG_PROFILE": "dev"}
+
+
+def test_chatbot_ui_dir_finds_consumers(tmp_path):
+    import validate_templates as vt
+
+    agent = tmp_path / "agent"
+    (agent / "scripts").mkdir(parents=True)
+    (agent / "scripts" / "start_app.py").write_text("")
+    assert vt.chatbot_ui_dir("agent-langgraph", agent) == "e2e-chatbot-app-next"
+    assert vt.chatbot_ui_dir("agent-langchain-ts", tmp_path / "ts") == "ui"
+    assert vt.chatbot_ui_dir("streamlit-hello-world-app", tmp_path / "other") is None
+
+
+def test_prepare_source_bundles_chatbot_ui(tmp_path):
+    import validate_templates as vt
+
+    src = vt.prepare_source("agent-langchain-ts", tmp_path, bundle_chatbot_ui=True)
+    assert (src / "ui" / "package.json").exists()
+    assert not (src / "e2e-chatbot-app-next").exists()
+    # agent-langchain-ts gitignores /ui; the copy must not, or sync skips it
+    assert "/ui" not in (src / ".gitignore").read_text().splitlines()
+    plain = vt.prepare_source("agent-langgraph", tmp_path / "plain")
+    assert not (plain / "e2e-chatbot-app-next").exists()
+
+def test_apply_replacements_rewrites_text_but_not_lockfiles(tmp_path):
+    import validate_templates as vt
+
+    (tmp_path / "config" / "queries").mkdir(parents=True)
+    q = tmp_path / "config" / "queries" / "q.sql"
+    q.write_text("SELECT 1 FROM REPLACE_ME.gold.t")
+    lock = tmp_path / "package-lock.json"
+    lock.write_text("REPLACE_ME.gold.")
+    (tmp_path / "logo.png").write_bytes(b"\x89PNG\xff\xfe")
+    n = vt.apply_replacements(tmp_path, (("REPLACE_ME.gold.", "main.s."),))
+    assert n == 1
+    assert q.read_text() == "SELECT 1 FROM main.s.t"
+    assert lock.read_text() == "REPLACE_ME.gold."
+
+
+def test_config_parses_replace_mapping(tmp_path):
+    cfg_path = tmp_path / "c.yaml"
+    cfg_path.write_text(
+        "profile: p\nshared_app_name: a\nworkspace_source_root: /x\n"
+        "templates:\n  t: { verify: spa, replace: { 'A.': 'B.' } }\n"
+    )
+    cfg = load_validation_config(cfg_path, resolve_workspace_root=False)
+    assert cfg.templates[0].replace == (("A.", "B."),)

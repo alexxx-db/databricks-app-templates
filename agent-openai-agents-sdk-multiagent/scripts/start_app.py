@@ -25,6 +25,14 @@ import sys
 import threading
 from pathlib import Path
 
+# Install crash/hang/exception diagnostics as early as possible so failures in
+# this orchestrator (and surfaced from the backend) land in the Apps log stream.
+try:
+    from scripts.app_diagnostics import install_diagnostics
+except ImportError:  # when run outside the scripts package
+    from app_diagnostics import install_diagnostics
+install_diagnostics()
+
 from dotenv import load_dotenv
 
 # Readiness patterns
@@ -242,17 +250,21 @@ class ProcessManager:
             if not self.no_ui:
                 # Setup and start frontend
                 frontend_dir = Path("e2e-chatbot-app-next")
-                for cmd, desc in [("npm install", "install"), ("npm run build", "build")]:
+                # npm is a .cmd shim on Windows, which can't be launched by bare
+                # name without a shell; resolve its full path (honors PATHEXT) so
+                # argument lists work on every platform.
+                npm = shutil.which("npm") or "npm"
+                for args, desc in [(["install"], "install"), (["run", "build"], "build")]:
                     print(f"Running npm {desc}...")
                     result = subprocess.run(  # nosemgrep: dangerous-subprocess-use-audit
-                        cmd.split(), cwd=frontend_dir, capture_output=True, text=True
+                        [npm, *args], cwd=frontend_dir, capture_output=True, text=True
                     )
                     if result.returncode != 0:
                         print(f"npm {desc} failed: {result.stderr}")
                         return 1
 
                 self.frontend_process = self.start_process(
-                    ["npm", "run", "start"],
+                    [npm, "run", "start"],
                     "frontend",
                     self.frontend_log,
                     FRONTEND_READY,

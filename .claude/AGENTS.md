@@ -141,7 +141,7 @@ The single-file Python templates (Streamlit, Dash, Gradio, Shiny, Flask, the `st
   cd .scripts/classic-app-tests && uv run pytest -v -n 8
   ```
 - CI: `.github/workflows/classic-app-smoke.yml` runs these on PRs and weekly (catches breaking upstream releases, since `requirements.txt` use version ranges) and fails if generated files are stale.
-- Unbounded requirements are capped at the major version that resolved when they were last checked; shiny templates still on shiny 1.1 pin `htmltools<0.7` (0.7 breaks shiny 1.1 express UI); `shiny-hello-world-app` is on shiny 1.8 (from upstream), which requires `htmltools>=0.7`, so it has no pin.
+- Unbounded requirements are capped at the major version that resolved when they were last checked; all shiny templates are on shiny 1.8 (from upstream), which requires `htmltools>=0.7`, so none pin htmltools.
 
 ## Python showcases
 
