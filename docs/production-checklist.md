@@ -16,6 +16,9 @@ What to check before a Databricks App leaves the demo stage. Each item says why 
 - [ ] **Test against the runtime's Python (3.11).** Node.js apps run on Node 22.
 - [ ] **Run a smoke test in CI.** `.scripts/classic-app-tests/` resolves dependencies, boots each app and validates its bundle. It found two templates that broke because of upstream releases: shiny/`htmltools` and gradio/`starlette`.
 
+- [ ] **Scan clean with semgrep.** Databricks Apps runs semgrep (community rules) against deployed app source. Run it before deploying, e.g. `uvx semgrep scan --config p/default --config r/python --config r/generic .`, fix real findings, and suppress false positives inline with `# nosemgrep: <rule-id> -- <reason>`.
+- [ ] **Pin your supply chain.** Pin GitHub Actions to commit SHAs (tag in a trailing comment) and let Dependabot bump them; use exact versions in `package.json`; for `uv` projects consider a dependency cooldown (`exclude-newer = "7 days"` under `[tool.uv]`).
+
 ## Runtime behavior
 
 - [ ] **Listen on `0.0.0.0:$DATABRICKS_APP_PORT`.** Streamlit, Gradio, Flask, Uvicorn and Dash pick this up automatically from env vars the platform sets; custom servers must read it.

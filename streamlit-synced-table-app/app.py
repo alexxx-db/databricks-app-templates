@@ -39,12 +39,15 @@ def get_pool() -> ConnectionPool:
 
 def search(prefix: str, limit: int) -> pd.DataFrame:
     schema, table = SYNCED_TABLE.split(".", 1)
-    # Identifiers are quoted by psycopg; the user's text is a bound parameter.
-    query = sql.SQL("SELECT * FROM {} WHERE {} ILIKE %s ORDER BY {} LIMIT %s").format(
-        sql.Identifier(schema, table), sql.Identifier(SEARCH_COLUMN), sql.Identifier(SEARCH_COLUMN)
-    )
     with get_pool().connection() as conn, conn.cursor() as cur:
-        cur.execute(query, (f"{prefix}%", limit))
+        # Identifiers are quoted by psycopg; the user's text is a bound parameter.
+        # nosemgrep: sqlalchemy-execute-raw-query -- psycopg sql.SQL/sql.Identifier composition, values bound as %s
+        cur.execute(
+            sql.SQL("SELECT * FROM {} WHERE {} ILIKE %s ORDER BY {} LIMIT %s").format(
+                sql.Identifier(schema, table), sql.Identifier(SEARCH_COLUMN), sql.Identifier(SEARCH_COLUMN)
+            ),
+            (f"{prefix}%", limit),
+        )
         return pd.DataFrame(cur.fetchall(), columns=[d.name for d in cur.description])
 
 

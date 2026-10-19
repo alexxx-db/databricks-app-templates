@@ -60,7 +60,7 @@ tab_oee, tab_health, tab_wo = st.tabs(["OEE", "Asset health", "Work orders"])
 # --- OEE --------------------------------------------------------------------------
 with tab_oee:
     o1, o2 = st.columns(2)
-    days = o1.select_slider("Period", [7, 14, 30, 60], value=30, format_func=lambda d: f"Last {d} days")
+    days = o1.select_slider("Period", [7, 14, 30, 60], value=30, format_func="Last {} days".format)
     by = o2.radio("Break down by", list(DIMENSIONS), horizontal=True)
     rows = pd.DataFrame(query(oee_sql(S, by), {"days": days}))
     if not rows.empty:
@@ -128,7 +128,7 @@ with tab_wo:
     if not flagged:
         st.success("No machines are flagged right now.")
     else:
-        pick = st.selectbox("Flagged machine", flagged, format_func=lambda s: f"{s['machine_id']} · {s['status']}")
+        pick = st.selectbox("Flagged machine", flagged, format_func="{0[machine_id]} · {0[status]}".format)
         mid = pick["machine_id"]
         machine_row = query(f"SELECT * FROM {S}.machines WHERE machine_id = :m", {"m": mid})[0]
         manual = query(f"SELECT section_id, title, content FROM {S}.manuals WHERE machine_type = :t ORDER BY section_id",

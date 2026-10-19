@@ -59,7 +59,7 @@ st.dataframe(
     pd.DataFrame(
         [
             {
-                "name": e.name + ("/" if e.is_directory else ""),
+                "name": e.name + ("/" if e.is_directory else ""),  # nosemgrep: is-function-without-parentheses -- DirectoryEntry.is_directory is a bool field
                 "size (bytes)": e.file_size,
                 "modified": pd.to_datetime(e.last_modified, unit="ms") if e.last_modified else None,
             }
@@ -71,7 +71,7 @@ st.dataframe(
 )
 
 # --- Download / delete -------------------------------------------------------
-files = [e for e in entries if not e.is_directory]
+files = [e for e in entries if not e.is_directory]  # nosemgrep: is-function-without-parentheses -- bool field, not a method
 if files:
     name = st.selectbox("File", [e.name for e in files])
     path = safe_join(directory, name)

@@ -13,7 +13,7 @@ See [Create an App from a Template](https://docs.databricks.com/aws/en/dev-tools
 | Learn the platform / minimal starting point | a `*-hello-world-app` |
 | Dashboard over Unity Catalog tables | `appkit-analytics` (TypeScript) or a `*-data-app` (Python) |
 | CRUD app with its own database | `appkit-lakebase` (TypeScript) or a `*-postgres-app` (Python, Lakebase Autoscaling) |
-| Chat UI over a model or agent endpoint | `e2e-chatbot-app-next` (full-featured) or a `*-chatbot-app` (minimal Python) |
+| Chat UI over a model or agent endpoint | `e2e-chatbot-app-next` (full-featured) or a `*-chatbot-app` (minimal Python); `e2e-chatbot-model-service` for a Unity Catalog model service |
 | Agent with tools, memory, evaluation | `agent-langgraph` or `agent-openai-agents-sdk` (add `-advanced` for memory) |
 | Natural-language questions over data | `appkit-genie` |
 | Trigger and monitor a Lakeflow Job | `streamlit-jobs-app` |
@@ -69,6 +69,7 @@ Cross-cutting guides for building and running apps, whichever template you start
 | `agent-non-conversational` | A non-conversational agent that processes structured questions and provides answers with detailed reasoning | MLflow experiment |
 | `agent-migration-from-model-serving` | Template for migrating a ResponsesAgent from Model Serving to Databricks Apps | MLflow experiment |
 | `e2e-chatbot-app-next` | A chat UI that queries a remote agent endpoint or foundation model | Serving endpoint |
+| `e2e-chatbot-model-service` | A chat UI that queries a Unity Catalog model service via the Databricks Unity Gateway | UC model service (`EXECUTE` grant) |
 | `mcp-server-hello-world` | A basic MCP server | None |
 | `mcp-server-open-api-spec` | An MCP server that exposes REST API operations from an OpenAPI specification stored in a Unity Catalog volume | UC volume |
 

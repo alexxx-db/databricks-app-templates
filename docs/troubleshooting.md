@@ -15,6 +15,7 @@ Start with the logs: the app's **Logs** tab, `<app-url>/logz`, or `databricks ap
 | Starts, then hangs; never serves | Calling a Databricks API at import time (endpoint lookup, query, auth) that's slow or failing | Move it to first request / `@st.cache_resource`, and check that resource's permission |
 | `File is larger than 10485760 bytes` | A vendored package or data file in the source | Install from `requirements.txt` / `package.json`; keep data in volumes |
 | `ModuleNotFoundError` only when deployed | Package missing from `requirements.txt` (installed locally by hand) | Add it; test in a fresh venv: `uv run --isolated --with-requirements requirements.txt ...` |
+| Deploy flagged by a security scan | semgrep findings in the app source (raw SQL composition, `debug=True`, missing CSRF on forms, `subprocess` with dynamic input, ...) | Run `uvx semgrep scan --config p/default --config r/python --config r/generic .` locally, fix, or suppress verified false positives with `# nosemgrep: <rule-id> -- <reason>` |
 
 ## Permission errors
 

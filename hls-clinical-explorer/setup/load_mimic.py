@@ -52,7 +52,11 @@ def download_demo(dataset: str, dest: str) -> str:
             continue
         target.parent.mkdir(parents=True, exist_ok=True)
         tmp = target.with_suffix(target.suffix + ".part")
-        with urllib.request.urlopen(base + f"{rel}{ext}", timeout=120) as resp, open(tmp, "wb") as out:
+        url = base + f"{rel}{ext}"
+        if not url.startswith(tuple(DEMO_URLS.values())):  # only the hard-coded PhysioNet demo locations
+            raise ValueError(f"refusing to download from {url}")
+        # nosemgrep: dynamic-urllib-use-detected -- URL is a hard-coded https PhysioNet base + fixed file list, checked above
+        with urllib.request.urlopen(url, timeout=120) as resp, open(tmp, "wb") as out:
             while chunk := resp.read(1 << 20):
                 out.write(chunk)
         os.replace(tmp, target)

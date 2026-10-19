@@ -130,7 +130,9 @@ def _make_subagent_tool(subagent: dict):
     model = f"apps/{endpoint}" if subagent["type"] == "app" else endpoint
 
     async def _call(question: str) -> str:
-        response = await _tool_client.responses.create(
+        # Calls a Databricks endpoint/app, not the OpenAI platform, so OpenAI-only
+        # abuse-monitoring params like safety_identifier don't apply.
+        response = await _tool_client.responses.create(  # nosemgrep: openai-missing-safety-identifier-python
             model=model,
             input=[{"role": "user", "content": question}],
         )
@@ -213,7 +215,7 @@ def create_orchestrator_agent(
     return Agent(
         name="Orchestrator",
         instructions=instructions,
-        model="databricks-gpt-5-2",  # TODO: change model if desired
+        model="databricks-claude-sonnet-5-5",  # TODO: change model if desired
         mcp_servers=mcp_servers,
         tools=subagent_tools,
     )

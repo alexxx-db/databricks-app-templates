@@ -90,11 +90,11 @@ def build_case_context(alert: dict, rule: dict, customer: dict, evidence: list[d
         f"## Alert {alert['alert_id']}",
         f"Rule {rule['rule_id']} v{rule['version']}: {rule['description']}",
         f"Risk score {alert['score']}; flagged amount ${alert['total_amount']:,.2f}; "
-        f"activity {alert['first_ts']} to {alert['last_ts']}.",
+        + f"activity {alert['first_ts']} to {alert['last_ts']}.",
         "## Customer",
         f"{customer['name']} (ID {customer['customer_id']}), {customer['segment']}, occupation {customer['occupation']}, "
-        f"KYC risk {customer['risk_rating']}{', politically exposed person' if customer['pep'] else ''}, "
-        f"customer since {customer['onboarded']}.",
+        + f"KYC risk {customer['risk_rating']}{', politically exposed person' if customer['pep'] else ''}, "
+        + f"customer since {customer['onboarded']}.",
         "## Flagged transactions",
         *[f"{t['txn_id']} {t['ts']} {t['type']} ${t['amount']:,.2f} {t['counterparty'] or ''} ({t['counterparty_country']})"
           for t in evidence],

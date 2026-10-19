@@ -32,9 +32,9 @@ def build_context(adm: dict, diagnoses: list[dict], labs: list[dict], meds: list
     parts = [
         "## Admission",
         f"Age {adm['age']}{'+' if adm['age'] >= 90 else ''}, {adm.get('gender') or 'unknown sex'}; "
-        f"{adm['admission_type']} admission via {adm.get('admission_location') or 'unknown'}; "
-        f"length of stay {adm['los_days']} days; discharged to {adm.get('discharge_location') or 'unknown'}; "
-        f"in-hospital death: {'yes' if adm['hospital_expire_flag'] else 'no'}.",
+        + f"{adm['admission_type']} admission via {adm.get('admission_location') or 'unknown'}; "
+        + f"length of stay {adm['los_days']} days; discharged to {adm.get('discharge_location') or 'unknown'}; "
+        + f"in-hospital death: {'yes' if adm['hospital_expire_flag'] else 'no'}.",
         "## Diagnoses (by priority)",
         *_lines(diagnoses, lambda d: f"{d['seq_num']}. {d.get('long_title') or 'ICD code'} ({d['icd_code']}, ICD-{d['icd_version']})"),
         "## ICU stays",
@@ -42,7 +42,7 @@ def build_context(adm: dict, diagnoses: list[dict], labs: list[dict], meds: list
                 else f"{s['first_careunit']}"),
         "## Labs flagged abnormal (count, min-max, last value)",
         *_lines(labs, lambda l: f"{l['label']}: {l['n_abnormal']}x, {l['min_value']}-{l['max_value']} {l['unit'] or ''}, "
-                                f"last {l['last_value']}"),
+                                + f"last {l['last_value']}"),
         "## Medications (most frequent)",
         *_lines(meds, lambda m: f"{m['drug']} ({m['n']} orders; {m.get('route') or 'route n/a'})"),
     ]

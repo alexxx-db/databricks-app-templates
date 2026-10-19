@@ -165,7 +165,7 @@ with tab_intake:
     message = st.text_area("Resident's message", height=120,
                            placeholder="There's a big pothole on Main St near 1200, my number is 816-555-0142")
     i1, i2, i3 = st.columns(3)
-    district = i1.selectbox("District", districts, format_func=lambda d: f"{d['district_id']}. {d['name']}")
+    district = i1.selectbox("District", districts, format_func="{0[district_id]}. {0[name]}".format)
     channel = i2.selectbox("Channel", ["Phone", "Mobile App", "Web", "Walk-in"])
     language = i3.selectbox("Resident's language", list(LANGUAGES), format_func=LANGUAGES.get)
 

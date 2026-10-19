@@ -24,7 +24,7 @@ def build_context(machine: dict, status: dict, episodes: list[dict], maintenance
     lines = [
         f"## Machine {machine['machine_id']} ({machine['machine_type']}, line {machine['line']})",
         f"Current status {status['status']}: vibration {status['vibration_x_baseline']}x its baseline "
-        f"over the last 24 h, temperature {status['temperature_c']} C.",
+        + f"over the last 24 h, temperature {status['temperature_c']} C.",
         "## Alert history",
         *([f"Sustained high vibration from {e['started_at']} for {e['hours']} h" for e in episodes] or ["none"]),
         "## Maintenance history",

@@ -154,7 +154,8 @@ with tab_care:
             edit_problems = validate_draft(message, with_credit, float(df["credit"].max())) if not df.empty else []
             for p in edit_problems:
                 st.error(f"Message {p}.")
-            preview = df.head(5).assign(sms=lambda d: [render(message, c) for c in d["credit"]])
+            preview = df.head(5).copy()
+            preview["sms"] = [render(message, c) for c in preview["credit"]]
             st.dataframe(preview[["customer_id", "first_name", "plan", "credit", "sms"]], hide_index=True,
                          use_container_width=True)
             if st.button("Approve and queue", type="primary", disabled=bool(edit_problems) or df.empty):

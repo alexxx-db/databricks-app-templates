@@ -20,7 +20,7 @@ The app runs as its own **service principal**. Databricks injects its OAuth cred
 ```bash
 uv venv && source .venv/bin/activate
 uv pip install -r requirements.txt
-shiny run --reload app.py:app
+shiny run --reload --host 0.0.0.0 --port 8000 app.py
 ```
 
 ## Deploy
