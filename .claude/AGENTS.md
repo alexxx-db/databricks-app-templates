@@ -8,7 +8,7 @@ Shared files are copied from source-of-truth directories into each template. **N
 
 | Source directory | Sync command | What it syncs |
 |---|---|---|
-| `.scripts/source/` | `uv run python .scripts/sync-scripts.py` | `quickstart.py`, `start_app.py`, `evaluate_agent.py`, `grant_lakebase_permissions.py`, `preflight.py`, plus `.github/workflows/deploy.yml` for templates with `has_actions: True` (with `{{BUNDLE_NAME}}` substitution) |
+| `.scripts/source/` | `uv run python .scripts/sync-scripts.py` | `quickstart.py`, `start_app.py`, `evaluate_agent.py`, `grant_lakebase_permissions.py`, `preflight.py`, `app_diagnostics.py` (also into every non-agent template in `DIAGNOSTICS_PY_TARGETS`; `diagnostics.ts` into `DIAGNOSTICS_TS_TARGETS`), plus `.github/workflows/deploy.yml` for templates with `has_actions: True` (with `{{BUNDLE_NAME}}` substitution) |
 | `.claude/skills/` | `uv run python .scripts/sync-skills.py` | All skill directories under `{template}/.claude/skills/` |
 
 After modifying any source file, run the corresponding sync command and commit the synced copies.
@@ -74,6 +74,10 @@ The 3 base templates (`agent-langgraph`, `agent-openai-agents-sdk`, `agent-non-c
 ### Per-template AGENTS.md
 
 Each template has its own `{template}/AGENTS.md` (loaded via `{template}/CLAUDE.md`). These are maintained individually and are **not synced** — they contain template-specific guidance for end users.
+
+## Diagnostics
+
+Every template installs the crash/hang diagnostics bootstrap first thing in its entrypoint (see the `diagnostics` skill). A new non-OBO template must be added to `DIAGNOSTICS_PY_TARGETS` / `DIAGNOSTICS_TS_TARGETS` in `.scripts/sync-scripts.py` with the bootstrap block at the top of its entrypoint, or `test_diagnostics_coverage.py` fails. Fork-only templates (showcases, `streamlit-*` integration examples) are wired in the same way.
 
 ## Tests
 

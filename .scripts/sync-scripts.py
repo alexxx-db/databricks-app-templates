@@ -99,6 +99,18 @@ DIAGNOSTICS_PY_TARGETS = {
     "shiny-data-app": ".",
     "mcp-server-hello-world": "server",
     "nodejs-fastapi-hello-world-app": "backend",
+    # fork-only templates (classic integration examples + Python showcases)
+    "streamlit-files-app": ".",
+    "streamlit-group-access-app": ".",
+    "streamlit-jobs-app": ".",
+    "streamlit-synced-table-app": ".",
+    "streamlit-vector-search-app": ".",
+    "aml-alert-triage": ".",
+    "city-311-operations": ".",
+    "factory-oee-maintenance": ".",
+    "hls-clinical-explorer": ".",
+    "retail-customer-assistant": ".",
+    "telco-network-care": ".",
 }
 
 
